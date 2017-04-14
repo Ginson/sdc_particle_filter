@@ -47,6 +47,11 @@ int main()
     normal_distribution<double> N_obs_x(0, sigma_landmark[0]);
     normal_distribution<double> N_obs_y(0, sigma_landmark[1]);
     double n_x, n_y, n_theta, n_range, n_heading;
+
+    /// @todo Delete?
+    n_range;
+    n_heading;
+
     // Read map data
     Map map;
     if (!read_map_data("data/map_data.txt", map))
@@ -72,7 +77,7 @@ int main()
     }
 
     // Run particle filter!
-    int num_time_steps = position_meas.size();
+    auto num_time_steps = position_meas.size();
     ParticleFilter pf;
     double total_error[3] = {0, 0, 0};
     double cum_mean_error[3] = {0, 0, 0};
@@ -121,16 +126,16 @@ int main()
         pf.resample();
 
         // Calculate and output the average weighted error of the particle filter over all time steps so far.
-        vector<Particle> particles = pf.particles;
-        int num_particles = particles.size();
+        vector<Particle> particles = pf.particles_;
+        auto num_particles = particles.size();
         double highest_weight = 0.0;
         Particle best_particle;
-        for (int i = 0; i < num_particles; ++i)
+        for (int k = 0; k < num_particles; ++k)
         {
-            if (particles[i].weight > highest_weight)
+            if (particles[k].weight > highest_weight)
             {
-                highest_weight = particles[i].weight;
-                best_particle = particles[i];
+                highest_weight = particles[k].weight;
+                best_particle = particles[k];
             }
         }
         double* avg_error =
