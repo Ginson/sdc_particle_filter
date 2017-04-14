@@ -16,7 +16,7 @@ struct Particle
     int id;
     double x;
     double y;
-    double theta;
+    double yaw;
     double weight;
 };
 
@@ -24,7 +24,6 @@ class ParticleFilter
 {
   public:
     // Constructor
-    // @param M Number of particles
     ParticleFilter() : num_particles_(0), is_initialized_(false) {}
 
     // Destructor
@@ -70,7 +69,7 @@ class ParticleFilter
      * @param predicted Vector of predicted landmark observations
      * @param observations Vector of landmark observations
      */
-    void dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations);
+    void dataAssociation(Map predicted, std::vector<LandmarkObs>& observations);
 
     /**
      * updateWeights Updates the weights for each particle based on the likelihood of the
