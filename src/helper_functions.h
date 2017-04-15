@@ -1,9 +1,7 @@
-/*
- * helper_functions.h
- * Some helper functions for the 2D particle filter.
- *  Created on: Dec 13, 2016
- *      Author: Tiffany Huang
- */
+///
+/// @file
+/// @brief Some helper functions for the 2D particle filter
+///
 
 #ifndef HELPER_FUNCTIONS_H_
 #define HELPER_FUNCTIONS_H_
@@ -14,9 +12,7 @@
 #include <vector>
 #include "map.h"
 
-/*
- * Struct representing one position/control measurement.
- */
+/// @brief Struct representing one position/control measurement.
 struct control_s
 {
 
@@ -24,9 +20,7 @@ struct control_s
     double yawrate;   // Yaw rate [rad/s]
 };
 
-/*
- * Struct representing one ground truth position.
- */
+/// @brief Struct representing one ground truth position.
 struct ground_truth
 {
 
@@ -35,9 +29,7 @@ struct ground_truth
     double theta;  // Global vehicle yaw [rad]
 };
 
-/*
- * Struct representing one landmark observation measurement.
- */
+/// @brief Struct representing one landmark observation measurement.
 struct LandmarkObs
 {
 
@@ -46,12 +38,10 @@ struct LandmarkObs
     double y;  // Local (vehicle coordinates) y position of landmark observation [m]
 };
 
-/*
- * Computes the Euclidean distance between two 2D points.
- * @param (x1,y1) x and y coordinates of first point
- * @param (x2,y2) x and y coordinates of second point
- * @output Euclidean distance between two 2D points
- */
+/// @briefComputes the Euclidean distance between two 2D points.
+/// @param (x1,y1) x and y coordinates of first point
+/// @param (x2,y2) x and y coordinates of second point
+/// @output Euclidean distance between two 2D points
 inline double dist(double x1, double y1, double x2, double y2)
 {
     return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -66,10 +56,9 @@ inline double* getError(double gt_x, double gt_y, double gt_theta, double pf_x, 
     return error;
 }
 
-/* Reads map data from a file.
- * @param filename Name of file containing map data.
- * @output True if opening and reading file was successful
- */
+/// @briefReads map data from a file.
+/// @param filename Name of file containing map data.
+/// @output True if opening and reading file was successful
 inline bool read_map_data(std::string filename, Map& map)
 {
 
@@ -113,10 +102,9 @@ inline bool read_map_data(std::string filename, Map& map)
     return true;
 }
 
-/* Reads control data from a file.
- * @param filename Name of file containing control measurements.
- * @output True if opening and reading file was successful
- */
+/// @brief Reads control data from a file.
+/// @param filename Name of file containing control measurements.
+/// @output True if opening and reading file was successful
 inline bool read_control_data(std::string filename, std::vector<control_s>& position_meas)
 {
 
@@ -158,10 +146,9 @@ inline bool read_control_data(std::string filename, std::vector<control_s>& posi
     return true;
 }
 
-/* Reads ground truth data from a file.
- * @param filename Name of file containing ground truth.
- * @output True if opening and reading file was successful
- */
+/// @brief Reads ground truth data from a file.
+/// @param filename Name of file containing ground truth.
+/// @output True if opening and reading file was successful
 inline bool read_gt_data(std::string filename, std::vector<ground_truth>& gt)
 {
 
@@ -204,10 +191,9 @@ inline bool read_gt_data(std::string filename, std::vector<ground_truth>& gt)
     return true;
 }
 
-/* Reads landmark observation data from a file.
- * @param filename Name of file containing landmark observation measurements.
- * @output True if opening and reading file was successful
- */
+/// @brief Reads landmark observation data from a file.
+/// @param filename Name of file containing landmark observation measurements.
+/// @output True if opening and reading file was successful
 inline bool read_landmark_data(std::string filename, std::vector<LandmarkObs>& observations)
 {
 
@@ -248,4 +234,4 @@ inline bool read_landmark_data(std::string filename, std::vector<LandmarkObs>& o
     return true;
 }
 
-#endif /* HELPER_FUNCTIONS_H_ */
+#endif  // HELPER_FUNCTIONS_H_

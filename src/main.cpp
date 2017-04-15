@@ -1,9 +1,7 @@
-/*
- * main.cpp
- * Reads in data and runs 2D particle filter.
- *  Created on: Dec 13, 2016
- *      Author: Tiffany Huang
- */
+///
+/// @file
+/// @brief Reads in data and runs 2D particle filter.
+///
 
 #include <ctime>
 #include <iomanip>
@@ -122,8 +120,11 @@ int main()
             noisy_observations.push_back(obs);
         }
 
-        // Update the weights and resample
+        // Update the weights and re-sample
         pf.UpdateWeights(sensor_range, sigma_landmark, noisy_observations, map);
+
+        // Calls the re-sampling step
+        pf.Resample();
 
         // Calculate and output the average weighted error of the particle filter over all time steps so far.
         vector<Particle> particles = pf.particles_;
@@ -142,14 +143,13 @@ int main()
             }
         }
 
-        // Calls the resampling step
-        pf.Resample();
-
-        cout << "Highest Weigth: " << highest_weight << endl;
-        cout << "Best paticle (x, y, yaw): " << best_particle.x << ", " << best_particle.y << ", " << best_particle.yaw
+        // Some debug output
+        cout << "Highest weight: " << highest_weight << endl;
+        cout << "Best particle (x, y, yaw): " << best_particle.x << ", " << best_particle.y << ", " << best_particle.yaw
              << endl;
         cout << "Ground Truth (x, y, yaw): " << gt[i].x << ", " << gt[i].y << ", " << gt[i].theta << endl;
 
+        // Performance measure
         double* avg_error =
             getError(gt[i].x, gt[i].y, gt[i].theta, best_particle.x, best_particle.y, best_particle.yaw);
 
