@@ -22,7 +22,7 @@ void ParticleFilter::Initialize(const double gps_x, const double gps_y, const do
 
     std::default_random_engine gen;
 
-    // Fetch the std devs
+    // Fetch the std deviations
     auto std_x = std[0];
     auto std_y = std[1];
     auto std_yaw = std[2];
@@ -116,32 +116,6 @@ void ParticleFilter::AssociateObservationsWithLandmarks(const Map& predictions, 
     }
 }
 
-void ParticleFilter::AssociateObservationsWithLandmarks(const std::vector<LandmarkObs>& predictions,
-                                                        std::vector<LandmarkObs>& observations)
-{
-    // TODO: Find the predicted measurement that is closest to each observed measurement and assign the
-    //   observed measurement to this particular landmark.
-    // NOTE: this method will NOT be called by the grading code. But you will probably find it useful to
-    //   implement this method and use it as a helper during the updateWeights phase.
-
-    for (auto& observation : observations)
-    {
-        auto min_distance = std::numeric_limits<double>::max();
-        for (const auto& prediction : predictions)
-        {
-            auto x = observation.x - prediction.x;
-            auto y = observation.y - prediction.y;
-            auto dist = sqrt(pow(x, 2) + pow(y, 2));
-
-            if (dist < min_distance)
-            {
-                min_distance = dist;
-                observation.id = prediction.id;
-            }
-        }
-    }
-}
-
 void ParticleFilter::UpdateWeights(const double sensor_range,
                                    const double std_landmark[],
                                    const std::vector<LandmarkObs>& observations,
@@ -159,22 +133,21 @@ void ParticleFilter::UpdateWeights(const double sensor_range,
     //   for the fact that the map's y-axis actually points downwards.)
     //   http://planning.cs.uiuc.edu/node99.html
 
+    // Actually this is not used in my approach as we do not predict measurements,
+    // but directly transform the given observations into map space.
+    sensor_range;
+
     for (auto& particle : particles_)
     {
         auto current_observations = observations;
 
-        // Prediction approach
-        // std::vector<LandmarkObs> predictions;
-        // PredictObservations(sensor_range, map_landmarks, particle, predictions);
-        // AssociateObservationsWithLandmarks(predictions, current_observations);
-
         // Transform car to map coordinate system
         TransformToMapCoordinateSystem(particle, current_observations);
-        sensor_range;
 
         // Data association
         AssociateObservationsWithLandmarks(map_landmarks, current_observations);
 
+        // Computes the weight for the particle
         auto weight = ComputeWeight(std_landmark, map_landmarks, current_observations);
 
         // Assign weight to particle
@@ -182,32 +155,31 @@ void ParticleFilter::UpdateWeights(const double sensor_range,
     }
 }
 
-void ParticleFilter::PredictObservations(const double sensor_range,
-                                         const Map& map_landmarks,
-                                         const Particle& particle,
-                                         std::vector<LandmarkObs>& predictions)
+void ParticleFilter::Resample()
 {
-    for (auto landmark : map_landmarks.landmark_list)
+    // TODO: Resample particles with replacement with probability proportional to their weight.
+    // NOTE: You may find std::discrete_distribution helpful here.
+    //   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
+
+    std::default_random_engine gen;
+
+    std::vector<double> all_weights;
+    for (auto& particle : particles_)
     {
-        auto x = landmark.x_f - particle.x;
-        auto y = landmark.y_f - particle.y;
-        auto dist = sqrt(pow(x, 2) + pow(y, 2));
-
-        if (dist < sensor_range)
-        {
-            LandmarkObs pred_measurement;
-            pred_measurement.id = landmark.id_i;
-
-            // pred_measurement.x = cos(particle.yaw) * dist;
-            // pred_measurement.y = -sin(particle.yaw) * dist;
-
-            pred_measurement.x = x;
-            pred_measurement.y = y;
-
-            TransformToMapCoordinateSystem(particle, pred_measurement);
-            predictions.push_back(pred_measurement);
-        }
+        all_weights.push_back(particle.weight);
+        particle.weight = 1.0;
     }
+
+    std::discrete_distribution<> d(all_weights.begin(), all_weights.end());
+    std::vector<Particle> particles_resampled;
+
+    for (int n = 0; n < num_particles_; ++n)
+    {
+        auto to_be_sampled = d(gen);
+        Particle resampled_particle = particles_[to_be_sampled];
+        particles_resampled.push_back(resampled_particle);
+    }
+    particles_ = particles_resampled;
 }
 
 double ParticleFilter::ComputeWeight(const double std_landmark[],
@@ -263,44 +235,6 @@ void ParticleFilter::TransformToMapCoordinateSystem(const Particle& particle, st
         observation.x = x;
         observation.y = y;
     }
-}
-
-void ParticleFilter::TransformToMapCoordinateSystem(const Particle& particle, LandmarkObs& observation)
-{
-    auto yaw = particle.yaw;
-
-    auto x = observation.x * cos(yaw) + observation.y * sin(yaw) + particle.x;
-    auto y = observation.x * sin(yaw) + observation.y * cos(yaw) + particle.y;
-
-    observation.x = x;
-    observation.y = y;
-}
-
-void ParticleFilter::Resample()
-{
-    // TODO: Resample particles with replacement with probability proportional to their weight.
-    // NOTE: You may find std::discrete_distribution helpful here.
-    //   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
-
-    std::default_random_engine gen;
-
-    std::vector<double> all_weights;
-    for (auto& particle : particles_)
-    {
-        all_weights.push_back(particle.weight);
-        particle.weight = 1.0;
-    }
-
-    std::discrete_distribution<> d(all_weights.begin(), all_weights.end());
-    std::vector<Particle> particles_resampled;
-
-    for (int n = 0; n < num_particles_; ++n)
-    {
-        auto to_be_sampled = d(gen);
-        Particle resampled_particle = particles_[to_be_sampled];
-        particles_resampled.push_back(resampled_particle);
-    }
-    particles_ = particles_resampled;
 }
 
 void ParticleFilter::Write(std::string filename)

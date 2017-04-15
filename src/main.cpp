@@ -142,14 +142,13 @@ int main()
             }
         }
 
-        // Resampling step
+        // Calls the resampling step
         pf.Resample();
 
         cout << "Highest Weigth: " << highest_weight << endl;
         cout << "Best paticle (x, y, yaw): " << best_particle.x << ", " << best_particle.y << ", " << best_particle.yaw
              << endl;
         cout << "Ground Truth (x, y, yaw): " << gt[i].x << ", " << gt[i].y << ", " << gt[i].theta << endl;
-
 
         double* avg_error =
             getError(gt[i].x, gt[i].y, gt[i].theta, best_particle.x, best_particle.y, best_particle.yaw);

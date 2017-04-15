@@ -24,7 +24,7 @@ class ParticleFilter
 {
   public:
     // Constructor
-    ParticleFilter() : num_particles_(0), is_initialized_(false) {}
+    ParticleFilter() : is_initialized_(false), num_particles_(0), particles_() {}
 
     // Destructor
     ~ParticleFilter() {}
@@ -39,7 +39,7 @@ class ParticleFilter
     std::vector<Particle> particles_;
 
     /**
-     * init Initializes particle filter by initializing particles to Gaussian
+     * Initializes particle filter by initializing particles to Gaussian
      *   distribution around first position and all the weights to 1.
      * @param x Initial x position [m] (simulated estimate from GPS)
      * @param y Initial y position [m]
@@ -50,7 +50,7 @@ class ParticleFilter
     void Initialize(const double x, const double y, const double theta, const double std[]);
 
     /**
-     * prediction Predicts the state for the next time step
+     * Predicts the state for the next time step
      *   using the process model.
      * @param delta_t Time between time step t and t+1 in measurements [s]
      * @param std_pos[] Array of dimension 3 [standard deviation of x [m], standard deviation of y [m]
@@ -61,18 +61,15 @@ class ParticleFilter
     void Predict(const double delta_t, const double std_pos[], const double velocity, const double yaw_rate);
 
     /**
-     * dataAssociation Finds which observations correspond to which landmarks (likely by using
+     * Finds which observations correspond to which landmarks (likely by using
      *   a nearest-neighbors data association).
      * @param predicted Vector of predicted landmark observations
      * @param observations Vector of landmark observations
      */
     void AssociateObservationsWithLandmarks(const Map& predicted, std::vector<LandmarkObs>& observations);
 
-    void AssociateObservationsWithLandmarks(const std::vector<LandmarkObs>& predictions,
-                                            std::vector<LandmarkObs>& observation);
-
     /**
-     * updateWeights Updates the weights for each particle based on the likelihood of the
+     * Updates the weights for each particle based on the likelihood of the
      *   observed measurements.
      * @param sensor_range Range [m] of sensor
      * @param std_landmark[] Array of dimension 2 [standard deviation of range [m],
@@ -85,26 +82,20 @@ class ParticleFilter
                        const std::vector<LandmarkObs>& observations,
                        const Map& map_landmarks);
 
-    void PredictObservations(const double sensor_range,
-                             const Map& map_landmarks,
-                             const Particle& particle,
-                             std::vector<LandmarkObs>& predictions);
-
     double ComputeWeight(const double std_landmark[],
                          const Map& map_landmarks,
                          const std::vector<LandmarkObs>& observation);
 
     void TransformToMapCoordinateSystem(const Particle& particle, std::vector<LandmarkObs>& observations);
-    void TransformToMapCoordinateSystem(const Particle& particle, LandmarkObs& observation);
 
     /**
-     * resample Resamples from the updated set of particles to form
+     * Resamples from the updated set of particles to form
      *   the new set of particles.
      */
     void Resample();
 
     /*
-     * write Writes particle positions to a file.
+     * Writes particle positions to a file.
      * @param filename File to write particle positions to.
      */
     void Write(std::string filename);
