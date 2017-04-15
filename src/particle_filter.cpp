@@ -164,20 +164,16 @@ void ParticleFilter::UpdateWeights(const double sensor_range,
         auto current_observations = observations;
 
         // Prediction approach
-        std::vector<LandmarkObs> predictions;
-        PredictObservations(sensor_range, map_landmarks, particle, predictions);
-        AssociateObservationsWithLandmarks(predictions, current_observations);
+        // std::vector<LandmarkObs> predictions;
+        // PredictObservations(sensor_range, map_landmarks, particle, predictions);
+        // AssociateObservationsWithLandmarks(predictions, current_observations);
 
         // Transform car to map coordinate system
         TransformToMapCoordinateSystem(particle, current_observations);
+        sensor_range;
 
         // Data association
         AssociateObservationsWithLandmarks(map_landmarks, current_observations);
-
-        // Tests
-        // current_observations[0].x = map_landmarks.landmark_list[0].x_f - 0.29;
-        // current_observations[0].y = map_landmarks.landmark_list[0].y_f - 0.29;
-        // current_observations[0].id = map_landmarks.landmark_list[0].id_i;
 
         auto weight = ComputeWeight(std_landmark, map_landmarks, current_observations);
 
@@ -200,10 +196,15 @@ void ParticleFilter::PredictObservations(const double sensor_range,
         if (dist < sensor_range)
         {
             LandmarkObs pred_measurement;
-            pred_measurement.x = cos(particle.yaw) * dist;
-            pred_measurement.y = -sin(particle.yaw) * dist;
             pred_measurement.id = landmark.id_i;
 
+            // pred_measurement.x = cos(particle.yaw) * dist;
+            // pred_measurement.y = -sin(particle.yaw) * dist;
+
+            pred_measurement.x = x;
+            pred_measurement.y = y;
+
+            TransformToMapCoordinateSystem(particle, pred_measurement);
             predictions.push_back(pred_measurement);
         }
     }
@@ -256,12 +257,23 @@ void ParticleFilter::TransformToMapCoordinateSystem(const Particle& particle, st
     {
         auto yaw = particle.yaw;
 
-        auto x = observation.x * cos(yaw) + observation.y * sin(yaw) + particle.x;
+        auto x = observation.x * cos(yaw) - observation.y * sin(yaw) + particle.x;
         auto y = observation.x * sin(yaw) + observation.y * cos(yaw) + particle.y;
 
         observation.x = x;
         observation.y = y;
     }
+}
+
+void ParticleFilter::TransformToMapCoordinateSystem(const Particle& particle, LandmarkObs& observation)
+{
+    auto yaw = particle.yaw;
+
+    auto x = observation.x * cos(yaw) + observation.y * sin(yaw) + particle.x;
+    auto y = observation.x * sin(yaw) + observation.y * cos(yaw) + particle.y;
+
+    observation.x = x;
+    observation.y = y;
 }
 
 void ParticleFilter::Resample()
@@ -273,19 +285,22 @@ void ParticleFilter::Resample()
     std::default_random_engine gen;
 
     std::vector<double> all_weights;
-    for (const auto& particle : particles_)
+    for (auto& particle : particles_)
     {
         all_weights.push_back(particle.weight);
+        particle.weight = 1.0;
     }
 
-    // std::discrete_distribution<> d(all_weights.begin(), all_weights.end());
-    // std::pair<int, double> map;
-    // std::vector<Particle> particles_resampled;
+    std::discrete_distribution<> d(all_weights.begin(), all_weights.end());
+    std::vector<Particle> particles_resampled;
 
-    // for (int n = 0; n < num_particles_; ++n)
-    //{
-    //    // ++m[d(gen)];
-    //}
+    for (int n = 0; n < num_particles_; ++n)
+    {
+        auto to_be_sampled = d(gen);
+        Particle resampled_particle = particles_[to_be_sampled];
+        particles_resampled.push_back(resampled_particle);
+    }
+    particles_ = particles_resampled;
 }
 
 void ParticleFilter::Write(std::string filename)

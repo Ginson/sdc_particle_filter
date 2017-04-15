@@ -124,7 +124,6 @@ int main()
 
         // Update the weights and resample
         pf.UpdateWeights(sensor_range, sigma_landmark, noisy_observations, map);
-        pf.Resample();
 
         // Calculate and output the average weighted error of the particle filter over all time steps so far.
         vector<Particle> particles = pf.particles_;
@@ -142,6 +141,16 @@ int main()
                 best_particle = particles[k];
             }
         }
+
+        // Resampling step
+        pf.Resample();
+
+        cout << "Highest Weigth: " << highest_weight << endl;
+        cout << "Best paticle (x, y, yaw): " << best_particle.x << ", " << best_particle.y << ", " << best_particle.yaw
+             << endl;
+        cout << "Ground Truth (x, y, yaw): " << gt[i].x << ", " << gt[i].y << ", " << gt[i].theta << endl;
+
+
         double* avg_error =
             getError(gt[i].x, gt[i].y, gt[i].theta, best_particle.x, best_particle.y, best_particle.yaw);
 

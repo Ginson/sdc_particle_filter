@@ -95,6 +95,7 @@ class ParticleFilter
                          const std::vector<LandmarkObs>& observation);
 
     void TransformToMapCoordinateSystem(const Particle& particle, std::vector<LandmarkObs>& observations);
+    void TransformToMapCoordinateSystem(const Particle& particle, LandmarkObs& observation);
 
     /**
      * resample Resamples from the updated set of particles to form
