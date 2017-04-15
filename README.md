@@ -1,6 +1,17 @@
 # Overview
 This repository contains all the code needed to complete the final project for the Localization course in Udacity's Self-Driving Car Nanodegree.
 
+## Results
+![Terminal Output](results.png)
+
+## How To
+Use the configure.bat to configure two project:
+- One for Visual Studio 2015 with MSVC compiler
+- One generating Make file with GNU g++ compiler
+
+Call run_vs or run_make for either compiler.
+Or simply use the command suggested in "Running the Code"
+
 #### Submission
 All you will submit is your completed version of `particle_filter.cpp`, which is located in the `src` directory. You should probably do a `git pull` before submitting to verify that your project passes the most up-to-date version of the grading code (there are some parameters in `src/main.cpp` which govern the requirements on accuracy and run time.)
 
