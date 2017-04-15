@@ -45,11 +45,9 @@ int main()
     normal_distribution<double> N_obs_x(0, sigma_landmark[0]);
     normal_distribution<double> N_obs_y(0, sigma_landmark[1]);
 
-    double n_x, n_y, n_theta, n_range, n_heading;
-
-    /// @todo Delete?
-    n_range;
-    n_heading;
+    double n_x;
+    double n_y;
+    double n_theta;
 
     // Read map data
     Map map;
@@ -98,17 +96,17 @@ int main()
         }
 
         // Initialize particle filter if this is the first time step.
-        if (!pf.initialized())
+        if (!pf.IsInitialized())
         {
             n_x = N_x_init(gen);
             n_y = N_y_init(gen);
             n_theta = N_theta_init(gen);
-            pf.init(gt[i].x + n_x, gt[i].y + n_y, gt[i].theta + n_theta, sigma_pos);
+            pf.Initialize(gt[i].x + n_x, gt[i].y + n_y, gt[i].theta + n_theta, sigma_pos);
         }
         else
         {
             // Predict the vehicle's next state (noiseless).
-            pf.prediction(delta_t, sigma_pos, position_meas[i - 1].velocity, position_meas[i - 1].yawrate);
+            pf.Predict(delta_t, sigma_pos, position_meas[i - 1].velocity, position_meas[i - 1].yawrate);
         }
 
         // Simulate the addition of noise to noiseless observation data.
@@ -125,14 +123,17 @@ int main()
         }
 
         // Update the weights and resample
-        pf.updateWeights(sensor_range, sigma_landmark, noisy_observations, map);
-        pf.resample();
+        pf.UpdateWeights(sensor_range, sigma_landmark, noisy_observations, map);
+        pf.Resample();
 
         // Calculate and output the average weighted error of the particle filter over all time steps so far.
         vector<Particle> particles = pf.particles_;
         auto num_particles = particles.size();
+
+        // To account for not using the default initialized particle
         double highest_weight = 0.0;
         Particle best_particle;
+
         for (int k = 0; k < num_particles; ++k)
         {
             if (particles[k].weight > highest_weight)
@@ -186,11 +187,11 @@ int main()
     cout << "Runtime (sec): " << runtime << endl;
 
     // Print success if accuracy and runtime are sufficient (and this isn't just the starter code).
-    if (runtime < max_runtime && pf.initialized())
+    if (runtime < max_runtime && pf.IsInitialized())
     {
         cout << "Success! Your particle filter passed!" << endl;
     }
-    else if (!pf.initialized())
+    else if (!pf.IsInitialized())
     {
         cout << "This is the starter code. You haven't initialized your filter." << endl;
     }
